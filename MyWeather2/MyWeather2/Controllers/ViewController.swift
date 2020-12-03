@@ -17,6 +17,13 @@ let cellTextSize = CGFloat(18)
 let cellTextWeight = UIFont.Weight.semibold
 let weatherSymbolFrame = [55, 53]
 
+let backgroundColor = UIColor(red: 126/255, green: 116/255, blue: 116/255, alpha: 1)
+let collectionBGColor = UIColor(red: 196/255, green: 182/255, blue: 182/255, alpha: 0.8)
+let buttonColor = UIColor(red: 255/255, green: 221/255, blue: 147/255, alpha: 1)
+let mutedButtonColor = UIColor(displayP3Red: 255/255, green: 229/255, blue: 204/255, alpha: 1)
+let cornerRadius = 30
+
+
 class ViewController: UIViewController {
     @IBAction func longPressCollection(_ sender: UILongPressGestureRecognizer) {
         if sender.state == .began {
@@ -43,7 +50,7 @@ class ViewController: UIViewController {
             for item in weatherObjectsToShow {
                 if item.title == "Description" {
                     textToRead += "we have a \(item.value), "
-                } else if item.title == "Temperature" {
+                } else if item.title == "Temp." {
                     textToRead += "the temperature is \(item.value) Fahrenheit, "
                 } else if item.title == "Pressure" {
                     textToRead += "the atmospheric pressure is \(item.value) hectopascals, "
@@ -51,7 +58,7 @@ class ViewController: UIViewController {
                     textToRead += "the humidity is \(item.value) percent, "
                 } else if item.title == "Wind Speed" {
                     textToRead += "the wind speed is \(item.value) miles per hour, "
-                } else if item.title == "Wind Degree" {
+                } else if item.title == "Wind Deg." {
                     textToRead += "the wind direction is \(item.value) degrees, "
                 } else if item.title == "Cloudiness" {
                     textToRead += "the cloudiness is \(item.value) percent, "
@@ -64,7 +71,7 @@ class ViewController: UIViewController {
             synth.speak(utterance)
         } else {
             // When Done is pushed
-            readButton.setTitle("Read It", for: .normal)
+            showReadItButton()
             self.addMode = false
             var tempWeatherToShow = [WeatherItem]()
             for item in self.weatherObjects {
@@ -77,12 +84,6 @@ class ViewController: UIViewController {
         }
     }
     @IBOutlet weak var readButton: UIButton!
-    
-    let backgroundColor = UIColor(red: 126/255, green: 116/255, blue: 116/255, alpha: 1)
-    let collectionBGColor = UIColor(red: 196/255, green: 182/255, blue: 182/255, alpha: 0.8)
-    let buttonColor = UIColor(red: 255/255, green: 221/255, blue: 147/255, alpha: 1)
-    let mutedButtonColor = UIColor(displayP3Red: 255/255, green: 229/255, blue: 204/255, alpha: 1)
-    let cornerRadius = 25
     
     // MARK: - Weather Object Lists
     let city = "Jersey+City"
@@ -110,6 +111,8 @@ class ViewController: UIViewController {
         settingUpBotton()
         
         navigationController?.navigationBar.barTintColor = backgroundColor
+        
+        showReadItButton()
         
         // Wait for weather to load
         self.loadWeather()
@@ -151,11 +154,20 @@ class ViewController: UIViewController {
     }
     
     func settingUpBotton() {
-        readButton.widthAnchor.constraint(equalToConstant: view.frame.width).isActive = true
+        readButton.widthAnchor.constraint(equalToConstant: 300).isActive = true
         readButton.heightAnchor.constraint(equalToConstant: 80).isActive = true
         readButton.backgroundColor = buttonColor
         readButton.layer.cornerRadius = CGFloat(cornerRadius)
         readButton.isEnabled = false
+    }
+    
+    func showReadItButton() {
+        readButton.setImage(UIImage(systemName: "speaker.wave.2.circle"), for: .normal)
+        readButton.tintColor = .darkGray
+        readButton.imageView?.contentMode = .scaleAspectFit
+        readButton.contentVerticalAlignment = .fill
+        readButton.contentHorizontalAlignment = .fill
+        readButton.imageEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
     }
 }
 
@@ -247,7 +259,7 @@ extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource, 
                 weatherSymbolAttachment.image = UIImage(systemName: weatherObjectsToShow[indexPath.row].imgText)?.withRenderingMode(.alwaysTemplate)
                 weatherSymbolAttachment.bounds = CGRect(x: 0, y: -20, width: weatherSymbolFrame[0], height: weatherSymbolFrame[1])
                 let fullString = NSMutableAttributedString(attachment: weatherSymbolAttachment)
-                fullString.append(NSAttributedString(string: weatherObjects[indexPath.row].title + "\n", attributes: [NSAttributedString.Key.font: cellTextFontBold!]))
+                fullString.append(NSAttributedString(string: weatherObjectsToShow[indexPath.row].title + "\n", attributes: [NSAttributedString.Key.font: cellTextFontBold!]))
                 fullString.append(NSAttributedString(string: weatherObjectsToShow[indexPath.row].value + " " + weatherObjectsToShow[indexPath.row].unit, attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 22, weight: UIFont.Weight.bold)]))
                 label.attributedText = fullString
                 
@@ -284,7 +296,7 @@ extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource, 
     // MARK: - Add Clicked View
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if self.addMode == false && indexPath.row == weatherObjectsToShow.count {
-            readButton.setTitle("Done", for: .normal)
+            readButton.setImage(UIImage(systemName: "checkmark.circle"), for: .normal)
             self.addMode = true
             self.collectionView.reloadData()
         } else if self.addMode == true {

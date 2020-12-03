@@ -43,7 +43,7 @@
                                         <rect key="frame" x="0.0" y="694" width="394" height="54"/>
                                         <color key="backgroundColor" systemColor="systemYellowColor"/>
                                         <fontDescription key="fontDescription" name="SFCompactDisplay-Bold" family="SF Compact Display" pointSize="35"/>
-                                        <state key="normal" title="Read It">
+                                        <state key="normal">
                                             <color key="titleColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         </state>
                                         <connections>
