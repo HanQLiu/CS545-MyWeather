@@ -7,6 +7,7 @@
 
 import UIKit
 import AVFoundation
+import CoreLocation
 
 // Global Variables
 let userName = "Gregg"
@@ -91,6 +92,7 @@ class ViewController: UIViewController {
     var weatherObjectsToShow = [WeatherItem]()
     
     var weatherRequestManager = WeatherRequestManager()
+    let locationManager = CLLocationManager()
     
     var textToRead = "Good morning \(userName), today "
     let synth = AVSpeechSynthesizer()
@@ -102,6 +104,9 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         // Delegate
         weatherRequestManager.delegate = self
+        locationManager.delegate = self
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.requestLocation()
         
         view.backgroundColor = backgroundColor
         tabBarController?.tabBar.barTintColor = backgroundColor
@@ -115,8 +120,7 @@ class ViewController: UIViewController {
         showReadItButton()
         
         // Wait for weather to load
-        self.loadWeather()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             for item in self.weatherObjects {
                 if item.done == true {
                     self.weatherObjectsToShow.append(item)
@@ -127,15 +131,17 @@ class ViewController: UIViewController {
         }
     }
     
-    func loadWeather() {
-        weatherRequestManager.fetchWeather(cityName: city)
+    func showErrorAlertWhenNoWifi() {
+        let alert = UIAlertController(title: "Can't connect to internet", message: "Please check your internet connection", preferredStyle: .alert)
+        let action = UIAlertAction(title: "Ok", style: .default) { (action) in
+            // once Add Item Button clicked
+            self.collectionView.reloadData()
+        }
+        
+        alert.addAction(action)
+        
+        present(alert, animated: true, completion: nil)
     }
-    
-    
-    @objc func fetchWeatherAndFill () {
-        weatherRequestManager.fetchWeather(cityName: city)
-    }
-    
     
     func settingUpFlowLayout() {
         let layout = UICollectionViewFlowLayout()
@@ -359,5 +365,21 @@ extension ViewController: WeatherRequestManagerDelegate {
     
     func didFailWithError(error: Error) {
         print(error)
+    }
+}
+
+extension ViewController: CLLocationManagerDelegate {
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if let location = locations.last {
+            locationManager.stopUpdatingLocation()
+            let lon = location.coordinate.longitude
+            let lat = location.coordinate.latitude
+            weatherRequestManager.fetchWeather(latitude: lat, longitude: lon)
+        }
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print(error)
+        showErrorAlertWhenNoWifi()
     }
 }
